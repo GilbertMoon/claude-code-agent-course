@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "title": "Claude Code 학습하기",
+    "done": false,
+    "due": null,
+    "priority": "medium"
+  },
+  {
+    "id": 2,
+    "title": "Agent 개념 정리하기",
+    "done": true,
+    "due": "2026-09-20",
+    "priority": "high"
+  },
+  {
+    "id": 3,
+    "title": "실습 결과 기록하기",
+    "done": false,
+    "due": null,
+    "priority": "low"
+  }
+]
