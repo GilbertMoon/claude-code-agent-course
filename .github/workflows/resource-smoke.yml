@@ -9,6 +9,9 @@ on:
 jobs:
   windows-smoke:
     runs-on: windows-latest
+    env:
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: 'utf-8'
 
     steps:
       - name: Checkout
@@ -24,6 +27,7 @@ jobs:
         run: |
           python --version
           git --version
+          python -c "import sys; print(sys.stdout.encoding)"
 
       - name: Compile all starter Python files
         shell: pwsh
