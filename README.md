@@ -31,3 +31,15 @@
 ```
 
 이 Workflow는 정상 Chapter의 PASS뿐 아니라 각 Chapter에 정의된 **의도된 초기 실패 개수와 미구현 상태**도 함께 확인합니다.
+
+## Windows에서 Baseline 한 번에 확인
+
+저장소 루트에서 다음 스크립트를 실행하면 GitHub Actions와 같은 Baseline 검증을 로컬에서 한 번에 수행할 수 있습니다.
+
+```powershell
+.\scripts\run-baseline-smoke.ps1
+```
+
+스크립트는 Python UTF-8 출력을 활성화하고 Chapter 01~10의 문법, 기본 CLI, 회귀 테스트, 의도된 실패 계약을 비파괴 방식으로 확인합니다.
+
+Claude Code의 Plan Mode, Custom Sub-agent, Worktree, Agent Teams 같은 기능은 이 Baseline 스크립트의 대상이 아니며 실제 Claude Code 환경에서 별도로 확인합니다.
