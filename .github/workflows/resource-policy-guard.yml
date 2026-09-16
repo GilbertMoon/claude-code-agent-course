@@ -1,0 +1,68 @@
+name: Resource Policy Guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  public-policy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify chapter structure and forbidden content
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for n in $(seq -w 1 10); do
+            chapter="chapter${n}"
+            test -d "$chapter" || { echo "Missing $chapter"; exit 1; }
+            test -d "$chapter/starter" || { echo "Missing $chapter/starter"; exit 1; }
+
+            for entry in "$chapter"/*; do
+              [ -e "$entry" ] || continue
+              base="$(basename "$entry")"
+              case "$base" in
+                starter|templates) ;;
+                *)
+                  echo "Forbidden top-level entry in PUBLIC $chapter: $base"
+                  echo "PUBLIC chapters may contain only starter/ and optional templates/."
+                  exit 1
+                  ;;
+              esac
+            done
+          done
+
+          forbidden=$(find chapter* -type f \( \
+            -name 'EXERCISE.md' -o \
+            -name 'INSTRUCTOR_NOTES.md' -o \
+            -name 'FEATURE_STATUS*.md' -o \
+            -name 'MEASUREMENT_GUIDE*.md' \
+          \) -print)
+
+          if [ -n "$forbidden" ]; then
+            echo "Forbidden teaching/internal files found in PUBLIC repository:"
+            echo "$forbidden"
+            exit 1
+          fi
+
+          if find chapter* -type d \( -name solution -o -name blog \) -print | grep -q .; then
+            echo "Forbidden solution/blog directory found in PUBLIC repository."
+            find chapter* -type d \( -name solution -o -name blog \) -print
+            exit 1
+          fi
+
+          echo "PUBLIC resource-only policy: PASS"
+
+      - name: Verify root README declares resource-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '공개 실습 리소스 저장소' README.md
+          grep -q '강의안, 블로그 원고, 도서 원고는 이 저장소에 공개하지 않습니다' README.md
+          echo "Root policy declaration: PASS"
