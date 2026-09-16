@@ -8,7 +8,9 @@
 claude --version
 ```
 
-Native Windows에서 Cross-session Messaging까지 실습하려면 v2.1.234 이상을 권장합니다.
+Agent Teams가 기본 실습입니다.
+
+Cross-session Messaging 선택 실습은 **Claude Code v2.1.224 이상 + macOS/Linux/WSL2**에서만 진행합니다. Native Windows에서는 지원되지 않습니다.
 
 ## 기준 코드 확인
 
@@ -31,5 +33,7 @@ prompts/CROSS_SESSION_PROMPTS.md
 ```
 
 Agent Team은 JSON Persistence를 구현하지 않고 설계만 검토합니다.
+
+Windows 환경에서 WSL2를 사용하지 않는 경우 Cross-session Messaging은 실행하지 않고 강사 데모 또는 구조 비교로 대체합니다.
 
 결과는 상위 `templates/TEAM_RUN_RECORD.md`를 복사해 기록합니다.
