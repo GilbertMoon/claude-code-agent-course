@@ -1,0 +1,141 @@
+name: Resource Smoke Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows-smoke:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Show environment
+        shell: pwsh
+        run: |
+          python --version
+          git --version
+
+      - name: Compile all starter Python files
+        shell: pwsh
+        run: |
+          python -m compileall chapter01/starter
+          python -m compileall chapter02/starter
+          python -m compileall chapter03/starter
+          python -m compileall chapter04/starter
+          python -m compileall chapter05/starter
+          python -m compileall chapter06/starter
+          python -m compileall chapter07/starter
+          python -m compileall chapter08/starter
+          python -m compileall chapter09/starter
+          python -m compileall chapter10/starter
+
+      - name: Chapter 01 baseline
+        shell: pwsh
+        working-directory: chapter01/starter
+        run: python app.py
+
+      - name: Chapter 02 baseline
+        shell: pwsh
+        working-directory: chapter02/starter
+        run: python app.py list
+
+      - name: Chapter 03 baseline
+        shell: pwsh
+        working-directory: chapter03/starter
+        run: |
+          python app.py list
+          python app.py complete 2
+
+      - name: Chapter 04 intentional failing-test contract
+        shell: pwsh
+        working-directory: chapter04/starter
+        run: |
+          @'
+          import unittest
+
+          suite = unittest.defaultTestLoader.discover('tests')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          issue_count = len(result.failures) + len(result.errors)
+
+          assert result.testsRun == 7, f'expected 7 tests, got {result.testsRun}'
+          assert issue_count == 2, f'expected exactly 2 intentional failures/errors, got {issue_count}'
+          print('Chapter04 intentional baseline: PASS (7 tests, 2 expected issues)')
+          '@ | python -
+
+      - name: Chapter 05 stable regression suite
+        shell: pwsh
+        working-directory: chapter05/starter
+        run: python -m unittest discover -s tests -v
+
+      - name: Chapter 06 intentional missing-filter contract
+        shell: pwsh
+        working-directory: chapter06/starter
+        run: |
+          @'
+          import unittest
+
+          suite = unittest.defaultTestLoader.discover('tests')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          issue_count = len(result.failures) + len(result.errors)
+
+          assert result.testsRun == 16, f'expected 16 tests, got {result.testsRun}'
+          assert issue_count == 4, f'expected exactly 4 filter-related issues, got {issue_count}'
+          print('Chapter06 intentional baseline: PASS (16 tests, 4 expected issues)')
+          '@ | python -
+
+      - name: Chapter 07 intentional missing-search contract
+        shell: pwsh
+        working-directory: chapter07/starter
+        run: |
+          @'
+          import unittest
+
+          suite = unittest.defaultTestLoader.discover('tests')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          issue_count = len(result.failures) + len(result.errors)
+
+          assert result.testsRun == 21, f'expected 21 tests, got {result.testsRun}'
+          assert issue_count == 5, f'expected exactly 5 search-related issues, got {issue_count}'
+          print('Chapter07 intentional baseline: PASS (21 tests, 5 expected issues)')
+          '@ | python -
+
+      - name: Chapter 08 inherited regression suite
+        shell: pwsh
+        working-directory: chapter08/starter
+        run: python -m unittest tests.test_app -v
+
+      - name: Chapter 09 inherited regression suite
+        shell: pwsh
+        working-directory: chapter09/starter
+        run: python -m unittest tests.test_app -v
+
+      - name: Chapter 10 regression suite
+        shell: pwsh
+        working-directory: chapter10/starter
+        run: python -m unittest tests.test_app -v
+
+      - name: Chapter 10 intentional persistence baseline
+        shell: pwsh
+        working-directory: chapter10/starter
+        run: |
+          @'
+          import unittest
+
+          suite = unittest.defaultTestLoader.loadTestsFromName('evaluation.test_persistence')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          issue_count = len(result.failures) + len(result.errors)
+
+          assert result.testsRun == 7, f'expected 7 persistence evaluation tests, got {result.testsRun}'
+          assert issue_count > 0, 'starter persistence evaluation unexpectedly passes; starter may already contain the solution'
+          print(f'Chapter10 intentional persistence baseline: PASS (7 tests, {issue_count} expected issues)')
+          '@ | python -
