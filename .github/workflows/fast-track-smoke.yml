@@ -1,0 +1,50 @@
+name: Fast Track Smoke Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fast-track/**'
+      - 'chapter03/**'
+      - 'chapter04/**'
+      - 'chapter06/**'
+      - 'chapter07/**'
+      - 'scripts/run-fast-track-smoke.ps1'
+      - '.github/workflows/fast-track-smoke.yml'
+  pull_request:
+    paths:
+      - 'fast-track/**'
+      - 'chapter03/**'
+      - 'chapter04/**'
+      - 'chapter06/**'
+      - 'chapter07/**'
+      - 'scripts/run-fast-track-smoke.ps1'
+      - '.github/workflows/fast-track-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  windows-fast-track-smoke:
+    runs-on: windows-latest
+    env:
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: 'utf-8'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Show environment
+        shell: pwsh
+        run: |
+          python --version
+          git --version
+          python -c "import sys; print(sys.stdout.encoding)"
+
+      - name: Run Fast Track resource smoke
+        shell: pwsh
+        run: .\scripts\run-fast-track-smoke.ps1
