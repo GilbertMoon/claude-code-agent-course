@@ -16,6 +16,30 @@
 
 각 Chapter의 강의 내용은 별도의 블로그 또는 실제 수업에서 제공하며, 이 저장소에서는 실습에 필요한 파일만 내려받아 사용합니다.
 
+## 3강 Fast Track
+
+Chapter 01~10 전체 과정 전에 핵심 Agent Workflow를 빠르게 실습하려면 다음 학생용 진입 안내를 사용합니다.
+
+- [`fast-track/README.md`](fast-track/README.md)
+
+Fast Track은 별도의 코드를 복제하지 않고 기존 Chapter 리소스를 다음 순서로 재사용합니다.
+
+```text
+1강  chapter03
+ ↓
+2강  chapter04 → chapter06
+ ↓
+3강  chapter07
+```
+
+핵심 흐름은 다음과 같습니다.
+
+```text
+Single Agent
+→ Reliable Agent
+→ Multi-Agent Workflow
+```
+
 ## Starter와 테스트 안내
 
 일부 Chapter의 Starter는 학습 목표를 위해 **의도적으로 미완성 기능이나 실패 테스트를 포함**합니다.
