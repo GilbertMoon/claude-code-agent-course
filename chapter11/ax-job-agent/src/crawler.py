@@ -3,6 +3,7 @@
 JobKorea에 직접 요청하면 보안정책 페이지가 반환되므로(STEP 03),
 브라우저에서 저장한 검색 결과 HTML을 파싱한다. 이 모듈은 네트워크 요청을 보내지 않는다.
 """
+import json
 import os
 import re
 from datetime import datetime
@@ -94,20 +95,34 @@ def read_source_info(html_path=DEFAULT_HTML_PATH):
     }
 
 
+def html_collected_at(html_path=DEFAULT_HTML_PATH):
+    """HTML을 저장한 시각 문자열.
+
+    같은 이름의 메타 파일(예: jobkorea_search_ax.meta.json)이 있으면 그 안의 collected_at을 쓰고,
+    없으면 HTML 파일의 수정 시각을 쓴다. git checkout은 파일 수정 시각을 보존하지 않으므로
+    다른 환경(GitHub Actions 등)에서도 같은 값을 쓰려면 메타 파일이 필요하다.
+    """
+    meta_path = os.path.splitext(html_path)[0] + ".meta.json"
+    if os.path.exists(meta_path):
+        with open(meta_path, encoding="utf-8") as f:
+            return json.load(f)["collected_at"]
+    return datetime.fromtimestamp(os.path.getmtime(html_path)).strftime("%Y-%m-%d %H:%M:%S")
+
+
 def collect_jobs(html_path=DEFAULT_HTML_PATH, limit=5, search_keyword="ax"):
     """저장된 HTML에서 앞의 limit건을 추출해 STEP 02 컬럼의 DataFrame으로 만든다. (STEP 04~05)
 
     - 값은 HTML 화면 문자열 그대로다. (날짜 변환, URL 정규화는 clean_jobs에서 한다)
-    - collected_at은 저장된 HTML 파일의 수정 시각이다. (정확한 공고 수집 시각이 아님)
+    - collected_at은 HTML을 저장한 시각이다. (메타 파일 값, 없으면 HTML 파일 수정 시각. 정확한 공고 수집 시각이 아님)
     """
     jobs = [extract_job(card) for card in read_cards(html_path)[:limit]]
-    file_modified_at = datetime.fromtimestamp(os.path.getmtime(html_path)).strftime("%Y-%m-%d %H:%M:%S")
+    collected_at = html_collected_at(html_path)
 
     rows = []
     for job in jobs:
         row = dict(job)
         row["search_keyword"] = search_keyword
-        row["collected_at"] = file_modified_at
+        row["collected_at"] = collected_at
         rows.append(row)
 
     return pd.DataFrame(rows, columns=COLUMNS)
