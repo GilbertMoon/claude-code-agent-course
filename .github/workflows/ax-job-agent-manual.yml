@@ -1,0 +1,46 @@
+name: AX Job Agent (manual)
+
+# chapter11/ax-job-agent의 main.py를 수동으로 실행한다. (STEP 18)
+# 주간 schedule은 STEP 20에서 추가한다.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run-pipeline:
+    runs-on: windows-latest
+    env:
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: 'utf-8'
+    defaults:
+      run:
+        working-directory: chapter11/ax-job-agent
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        # requirements.txt가 없으므로 main.py 실행 경로의 패키지를 로컬 검증 버전으로 고정해 설치한다.
+        run: >-
+          python -m pip install
+          pandas==3.0.6
+          beautifulsoup4==4.15.0
+          requests==2.34.2
+          python-dotenv==1.2.3
+          pydantic==2.13.5
+
+      - name: Run main.py
+        # 값은 STEP 19에서 Repository Secrets로 등록한다. (미등록이면 빈 값)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python main.py
